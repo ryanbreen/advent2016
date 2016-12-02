@@ -1,6 +1,4 @@
 
-use std::collections::HashSet;
-
 fn part1 (input: String) -> String  {
 
   let mut keypad:[[u8; 3]; 3] = [[0; 3]; 3];
@@ -48,56 +46,45 @@ fn part1 (input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-    // 0 is north, 1 is east, 2 is south, 3 is west
-  let mut dir:i8 = 0;
 
-  let mut location:(i16, i16) = (0, 0);
-  let mut seen_locations = HashSet::new();
+  let mut keypad:[[char; 5]; 5] = [['-'; 5]; 5];
+  keypad[4] = ['-', '-', '1', '-', '-'];
+  keypad[3] = ['-', '2', '3', '4', '-'];
+  keypad[2] = ['5', '6', '7', '8', '9'];
+  keypad[1] = ['-', 'A', 'B', 'C', '-'];
+  keypad[0] = ['-', '-', 'D', '-', '-'];
 
-  let parts:Vec<&str> = input.split(", ").collect();
+  let mut answer:String = String::new();
+  let mut location:(isize, isize) = (1, 1);
 
-  let mut final_location:(i16, i16) = location;
+  let parts:Vec<&str> = input.split("\n").collect();
+  for line in &parts {
 
-  'outer: for instruction in &parts {
+    for c in line.chars() {
 
-    match instruction.chars().next() {
-      Some('L') => dir -= 1,
-      Some('R') => dir += 1,
-      _ => panic!("Invalid input")
-    };
+      let mut proposed_location = location;
 
-    if dir < 0 {
-      dir = 3;
-    }
+      match c {
+        'U' => proposed_location.1 += 1,
+        'D' => proposed_location.1 -= 1,
+        'R' => proposed_location.0 += 1,
+        'L' => proposed_location.0 -= 1,
+        _ => panic!("Invalid input")
+      };
 
-    if dir > 3 {
-      dir = 0;
-    }
+      if proposed_location.0 <= 4 && proposed_location.0 >= 0 &&
+         proposed_location.1 <= 4 && proposed_location.1 >= 0 &&
+         keypad[proposed_location.1 as usize][proposed_location.0 as usize] != '-' {
 
-    let distance_str:String = String::from(*instruction).chars().skip(1).collect();
-    let distance:i16 = distance_str.parse::<i16>().unwrap();
-
-    for _ in 0..distance {
-
-      match dir {
-        0 => { location.1 += 1 },
-        1 => { location.0 += 1 },
-        2 => { location.1 -= 1 },
-        3 => { location.0 -= 1 },
-        _ => { println!("Invalid direction") }
+        location = proposed_location;
       }
-
-      if seen_locations.contains(&location) {
-        println!("Visited twice {:?}", location);
-        final_location = location;
-        break 'outer;
-      }
-
-      seen_locations.insert(location);
     }
+
+    answer += &keypad[location.1 as usize][location.0 as usize].to_string();
   }
 
-  return (final_location.0.abs() + final_location.1.abs()).to_string();
+  return answer;
+
 }
 
 pub fn fill() -> super::Day {
@@ -116,7 +103,7 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "232".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "99332".to_string());
 }
 
 #[test]

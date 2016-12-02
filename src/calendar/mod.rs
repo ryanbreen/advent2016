@@ -1,5 +1,6 @@
 
 mod day1;
+mod day2;
 
 pub struct Puzzle {
   pub run: fn(String) -> String
@@ -23,6 +24,7 @@ impl Calendar {
   {
     let mut days = Vec::new();
     days.push(day1::fill());
+    days.push(day2::fill());
     Calendar {
       days: days
     }
