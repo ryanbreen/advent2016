@@ -1,48 +1,26 @@
 
 fn part1 (input: String) -> String  {
 
-  let mut keypad:[[u8; 3]; 3] = [[0; 3]; 3];
-  keypad[2] = [1, 2, 3];
-  keypad[1] = [4, 5, 6];
-  keypad[0] = [7, 8, 9];
-
-  let mut answer:String = String::new();
-  let mut location:(usize, usize) = (1, 1);
+  let mut counter:u16 = 0;
 
   let parts:Vec<&str> = input.split("\n").collect();
   for line in &parts {
 
-    for c in line.chars() {
+    let mut number_strings:Vec<&str> = line.split_whitespace().collect();
+    let mut numbers:[u16;3] = [0; 3];
 
-      match c {
-        'U' => {
-          if location.1 < 2 {
-            location.1 += 1;
-          }
-        },
-        'D' =>  {
-          if location.1 > 0 {
-            location.1 -= 1;
-          }
-        },
-        'R' => {
-          if location.0 < 2 {
-            location.0 += 1;
-          }
-        },
-        'L' =>  {
-          if location.0 > 0 {
-            location.0 -= 1;
-          }
-        },
-        _ => panic!("Invalid input")
-      };
+    number_strings.sort_by(|a, b| a.parse::<u16>().unwrap().cmp(&b.parse::<u16>().unwrap()));
+
+    for i in 0..3 {
+      numbers[i] = number_strings[i].parse::<u16>().unwrap();
     }
 
-    answer += &keypad[location.1][location.0].to_string();
+    if (numbers[0] + numbers[1]) > numbers[2] {
+      counter += 1;
+    }
   }
 
-  return answer;
+  return counter.to_string();
 }
 
 fn part2 (input: String) -> String  {
@@ -89,7 +67,6 @@ fn part2 (input: String) -> String  {
 
 pub fn fill() -> super::Day {
   return super::Day {
-    //input: include_str!("sample_input").to_string(),
     input: include_str!("input").to_string(),
     part1: super::Puzzle {
       run: part1,
@@ -103,7 +80,7 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "99332".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "993".to_string());
 }
 
 #[test]
