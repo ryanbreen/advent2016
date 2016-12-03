@@ -25,49 +25,59 @@ fn part1 (input: String) -> String  {
 
 fn part2 (input: String) -> String  {
 
-  let mut keypad:[[char; 5]; 5] = [['-'; 5]; 5];
-  keypad[4] = ['-', '-', '1', '-', '-'];
-  keypad[3] = ['-', '2', '3', '4', '-'];
-  keypad[2] = ['5', '6', '7', '8', '9'];
-  keypad[1] = ['-', 'A', 'B', 'C', '-'];
-  keypad[0] = ['-', '-', 'D', '-', '-'];
+  let mut original_parts:Vec<&str> = input.split("\n").collect();
 
-  let mut answer:String = String::new();
-  let mut location:(isize, isize) = (1, 1);
+  let mut parts:Vec<Vec<&str>> = Vec::new();
 
-  let parts:Vec<&str> = input.split("\n").collect();
-  for line in &parts {
+  for i in 0..(original_parts.len() / 3) {
+    let one:Vec<&str> = original_parts.pop().unwrap().split_whitespace().collect();
+    let two:Vec<&str> = original_parts.pop().unwrap().split_whitespace().collect();
+    let three:Vec<&str> = original_parts.pop().unwrap().split_whitespace().collect();
 
-    for c in line.chars() {
+    let mut new_one:Vec<&str> = Vec::new();
+    new_one.push(one[0]);
+    new_one.push(two[0]);
+    new_one.push(three[0]);
+    let mut new_two:Vec<&str> = Vec::new();
+    new_two.push(one[1]);
+    new_two.push(two[1]);
+    new_two.push(three[1]);
+    let mut new_three:Vec<&str> = Vec::new();
+    new_three.push(one[2]);
+    new_three.push(two[2]);
+    new_three.push(three[2]);
 
-      let mut proposed_location = location;
+    new_one.sort_by(|a, b| a.parse::<u16>().unwrap().cmp(&b.parse::<u16>().unwrap()));
+    new_two.sort_by(|a, b| a.parse::<u16>().unwrap().cmp(&b.parse::<u16>().unwrap()));
+    new_three.sort_by(|a, b| a.parse::<u16>().unwrap().cmp(&b.parse::<u16>().unwrap()));
 
-      match c {
-        'U' => proposed_location.1 += 1,
-        'D' => proposed_location.1 -= 1,
-        'R' => proposed_location.0 += 1,
-        'L' => proposed_location.0 -= 1,
-        _ => panic!("Invalid input")
-      };
-
-      if proposed_location.0 <= 4 && proposed_location.0 >= 0 &&
-         proposed_location.1 <= 4 && proposed_location.1 >= 0 &&
-         keypad[proposed_location.1 as usize][proposed_location.0 as usize] != '-' {
-
-        location = proposed_location;
-      }
-    }
-
-    answer += &keypad[location.1 as usize][location.0 as usize].to_string();
+    parts.push(new_one);
+    parts.push(new_two);
+    parts.push(new_three);
   }
 
-  return answer;
+  let mut counter:u16 = 0;
 
+  for number_strings in &parts {
+
+    let mut numbers:[u16;3] = [0; 3];
+
+    for i in 0..3 {
+      numbers[i] = number_strings[i].parse::<u16>().unwrap();
+    }
+
+    if (numbers[0] + numbers[1]) > numbers[2] {
+      counter += 1;
+    }
+  }
+
+  return counter.to_string();
 }
 
 pub fn fill() -> super::Day {
   return super::Day {
     input: include_str!("input").to_string(),
+    //input: include_str!("sample_input").to_string(),
     part1: super::Puzzle {
       run: part1,
     },
