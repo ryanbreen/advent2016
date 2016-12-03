@@ -29,7 +29,7 @@ fn part2 (input: String) -> String  {
 
   let mut parts:Vec<Vec<&str>> = Vec::new();
 
-  for i in 0..(original_parts.len() / 3) {
+  for _ in 0..(original_parts.len() / 3) {
     let one:Vec<&str> = original_parts.pop().unwrap().split_whitespace().collect();
     let two:Vec<&str> = original_parts.pop().unwrap().split_whitespace().collect();
     let three:Vec<&str> = original_parts.pop().unwrap().split_whitespace().collect();
@@ -96,5 +96,5 @@ fn test_part1() {
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "DD483".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "1849".to_string());
 }
