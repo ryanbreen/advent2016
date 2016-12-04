@@ -1,26 +1,16 @@
 use std::cmp::Ordering;
 
-#[derive(Debug, Copy, Clone)]
-struct CharCount {
-  c: char,
-  count: u8
+struct Room<'a> {
+  code: &'a str,
+  sector_id: u32,
+  checksum: &'a str
 }
 
-fn part1 (input: String) -> String  {
-
-  let mut counter:u32 = 0;
-
-  let parts:Vec<&str> = input.split("\n").collect();
-  for line in &parts {
-
-    // sector id: &line[line.len()-10..line.len()-7]
-    // checksum: &line[line.len()-6..line.len()-1]
-    let checksum = &line[line.len()-6..line.len()-1];
-    let code = &line[0..line.len()-11];
-
+impl<'a> Room<'a> {
+  fn is_real(&self) -> bool {
     let mut alphabet:[Option<CharCount>; 26] = [None; 26];
 
-    for c in code.chars() {
+    for c in self.code.chars() {
       if c == '-' {
         continue;
       }
@@ -69,8 +59,36 @@ fn part1 (input: String) -> String  {
       test_checksum.push(cc.c);
     }
 
-    if test_checksum == checksum {
-      counter += line[line.len()-10..line.len()-7].parse::<u32>().unwrap();
+    test_checksum == self.checksum
+  }
+}
+
+#[derive(Debug, Copy, Clone)]
+struct CharCount {
+  c: char,
+  count: u8
+}
+
+fn part1 (input: String) -> String  {
+
+  let mut counter:u32 = 0;
+
+  let parts:Vec<&str> = input.split("\n").collect();
+  for line in &parts {
+
+    // sector id: &line[line.len()-10..line.len()-7]
+    // checksum: &line[line.len()-6..line.len()-1]
+    let checksum = &line[line.len()-6..line.len()-1];
+    let code = &line[0..line.len()-11];
+    let sector_id = line[line.len()-10..line.len()-7].parse::<u32>().unwrap();
+    let room = Room {
+      checksum: checksum,
+      sector_id: sector_id,
+      code: code
+    };
+
+    if room.is_real() {
+      counter += room.sector_id;
     }
   }
 
@@ -78,7 +96,44 @@ fn part1 (input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-  return input.to_string();
+
+  let parts:Vec<&str> = input.split("\n").collect();
+  for line in &parts {
+
+    // sector id: &line[line.len()-10..line.len()-7]
+    // checksum: &line[line.len()-6..line.len()-1]
+    let checksum = &line[line.len()-6..line.len()-1];
+    let code = &line[0..line.len()-11];
+    let sector_id = line[line.len()-10..line.len()-7].parse::<u32>().unwrap();
+    let room = Room {
+      checksum: checksum,
+      sector_id: sector_id,
+      code: code
+    };
+
+    if room.is_real() {
+      // translate code
+      let mut translated = String::new();
+      for c in room.code.chars() {
+        match c {
+          '-' => translated.push(' '),
+          _ => {
+            let mut idx:u32 = (c as u32) - 97;
+            idx += room.sector_id as u32;
+            let new_char:char = ((idx%26) as u8 + 97) as char;
+
+            translated.push(new_char);
+          }
+        };
+      }
+
+      if translated == "northpole object storage" {
+        return room.sector_id.to_string();
+      }
+    }
+  }
+
+  return "FAILED".to_string();
 }
 
 pub fn fill() -> super::Day {
@@ -97,11 +152,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "993".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "361724".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "1849".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "482".to_string());
 }
