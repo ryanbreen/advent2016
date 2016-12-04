@@ -32,16 +32,11 @@ impl<'a> Room<'a> {
       }
     }
 
-    // Grab only the letters we've seen.  I'm sure there's a cleaner way to do this.
-    let mut seen_letters:Vec<CharCount> = vec!();
-    for cco in &alphabet {
-      match *cco {
-        None => {},
-        Some(cc) => {
-          seen_letters.push(cc);
-        }
-      }
-    }
+    // Grab only the letters we've seen.
+    let mut seen_letters:Vec<CharCount> = alphabet.iter().
+      filter(|l| !l.is_none() ).
+      map(|l| l.unwrap()).
+      collect();
 
     // Sort by count and then alpha
     seen_letters.sort_by(|a, b| {
