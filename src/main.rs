@@ -65,5 +65,5 @@ fn main() {
 #[test]
 fn calendar_test() {
   let calendar = calendar::Calendar::new();
-  assert_eq!(calendar.days.len(), 5);
+  assert_eq!(calendar.days.len(), 6);
 }

@@ -14,9 +14,15 @@ fn part1(input: String) -> String  {
 
   let start = Instant::now();
 
+  let mut pb = ProgressBar::new(8);
+  pb.format("╢▌▌░╟");
+  pb.message(&password);
+
   loop {
     sh.input_str(format!("{}{}", input, idx).as_str());
     if sh.result_str().starts_with(TEST) {
+      pb.inc();
+      pb.message(&password);
       password.push((sh.result_str().as_bytes()[5]) as char);
       if password.len() == 8 {
         println!("That took {}s", start.elapsed().as_secs());
@@ -35,8 +41,6 @@ fn part2 (input: String) -> String  {
 
   let mut password:Vec<u8> = vec!(120, 120, 120, 120, 120, 120, 120, 120);
   let mut sh = Md5::new();
-
-  let start = Instant::now();
 
   let mut pb = ProgressBar::new(8);
   pb.format("╢▌▌░╟");
@@ -67,7 +71,7 @@ fn part2 (input: String) -> String  {
 
       len += 1;
       if len == 8 {
-        pb.finish_print(&format!("That took {}s\n", start.elapsed().as_secs()));
+        pb.finish();
         return String::from_utf8(password).unwrap();
       }
     }
