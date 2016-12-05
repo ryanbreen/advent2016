@@ -48,11 +48,6 @@ fn part2 (input: String) -> String  {
     let tmp = sh.result_str();
     sh.reset();
 
-    // Only run this on a fraction of indices for speed.
-    if idx % 100 == 0 {
-      // Anything?
-    }
-
     if tmp.starts_with(TEST) {
       let mut pos = tmp.as_bytes()[5] as usize;
       if pos < 48 || pos > 55 {
