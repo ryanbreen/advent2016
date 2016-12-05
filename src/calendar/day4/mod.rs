@@ -33,12 +33,12 @@ impl<'a> Room<'a> {
     }
 
     // Grab only the letters we've seen.
-    let mut seen_letters:Vec<CharCount> = alphabet.iter().
-      filter(|l| !l.is_none() ).
-      map(|l| l.unwrap()).
-      collect();
+    let mut seen_letters:Vec<CharCount> = alphabet.iter()
+      .filter(|l| !l.is_none() )
+      .map(|l| l.unwrap() )
+      .collect();
 
-    // Sort by count and then alpha
+    // Sort by count and then by alpha in case of a tie.
     seen_letters.sort_by(|a, b| {
       let mut cmp = b.count.cmp(&a.count);
       if cmp == Ordering::Equal {
@@ -48,11 +48,7 @@ impl<'a> Room<'a> {
     });
 
     let _ = seen_letters.split_off(5);
-    let mut test_checksum = String::new();
-
-    for cc in seen_letters {
-      test_checksum.push(cc.c);
-    }
+    let test_checksum = seen_letters.into_iter().map(|s| s.c).collect::<String>();;
 
     test_checksum == self.checksum
   }
