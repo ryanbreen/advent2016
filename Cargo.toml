@@ -5,3 +5,4 @@ authors = ["Ryan Breen <rbreen@cimpress.com>"]
 
 [dependencies]
 getopts = "0.2"
+rust-crypto = "0.2.36"

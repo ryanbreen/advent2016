@@ -6,6 +6,8 @@ extern crate core;
 #[cfg(not(test))]
 extern crate getopts;
 
+extern crate crypto;
+
 #[cfg(not(test))]
 use getopts::Options;
 
@@ -61,5 +63,5 @@ fn main() {
 #[test]
 fn calendar_test() {
   let calendar = calendar::Calendar::new();
-  assert_eq!(calendar.days.len(), 4);
+  assert_eq!(calendar.days.len(), 5);
 }

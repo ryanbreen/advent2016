@@ -44,7 +44,7 @@ impl<'a> Room<'a> {
     });
 
     let _ = seen_letters.split_off(5);
-    let test_checksum = seen_letters.into_iter().map(|s| s.c).collect::<String>();;
+    let test_checksum = seen_letters.into_iter().map(|s| s.c).collect::<String>();
 
     test_checksum == self.checksum
   }
