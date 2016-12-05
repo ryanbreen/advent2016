@@ -1,5 +1,11 @@
 use std::cmp::Ordering;
 
+#[derive(Debug, Copy, Clone)]
+struct CharCount {
+  c: char,
+  count: u8
+}
+
 struct Room<'a> {
   code: &'a str,
   sector_id: u32,
@@ -8,34 +14,24 @@ struct Room<'a> {
 
 impl<'a> Room<'a> {
   fn is_real(&self) -> bool {
-    let mut alphabet:[Option<CharCount>; 26] = [None; 26];
+    let mut alphabet:[CharCount; 26] = [CharCount { c: '-', count: 0 }; 26];
 
     for c in self.code.chars() {
       if c == '-' {
         continue;
       }
-
       let idx = (c as usize) - 97;
-
-      match alphabet[idx] {
-        None => {
-          // We haven't seen this character yet
-          alphabet[idx] = Some(CharCount {
-            c: c,
-            count: 1
-          });
-        },
-        Some(mut cc) => {
-          cc.count = cc.count + 1;
-          alphabet[idx] = Some(cc);
-        }
+      if alphabet[idx].c == '-' {
+        alphabet[idx].c = c;
       }
-    }
+
+      alphabet[idx].count += 1;
+    };
 
     // Grab only the letters we've seen.
     let mut seen_letters:Vec<CharCount> = alphabet.iter()
-      .filter(|l| !l.is_none() )
-      .map(|l| l.unwrap() )
+      .filter(|cc| cc.c != '-')
+      .map(|cc| *cc)
       .collect();
 
     // Sort by count and then by alpha in case of a tie.
@@ -52,12 +48,6 @@ impl<'a> Room<'a> {
 
     test_checksum == self.checksum
   }
-}
-
-#[derive(Debug, Copy, Clone)]
-struct CharCount {
-  c: char,
-  count: u8
 }
 
 fn part1 (input: String) -> String  {
