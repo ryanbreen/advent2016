@@ -3,11 +3,8 @@
 all: $(build)
 
 build:
-	@cargo build
-
-run: $(build)
-	cargo run -- -d $(day) -p $(part)
+	@cargo build --release
 
 export RUST_MIN_STACK=33554432
 test:
-	@cargo test
+	@cargo test --release

@@ -3,6 +3,9 @@ name = "advent2016"
 version = "0.1.0"
 authors = ["Ryan Breen <rbreen@cimpress.com>"]
 
+[profile.release]
+debug = true
+
 [dependencies]
 getopts = "0.2"
 rust-crypto = "0.2.36"
