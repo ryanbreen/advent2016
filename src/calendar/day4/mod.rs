@@ -50,24 +50,26 @@ impl<'a> Room<'a> {
   }
 }
 
-fn part1 (input: String) -> String  {
+fn build_room<'a>(line: &'a str) -> Room<'a> {
+  // sector id: &line[line.len()-10..line.len()-7]
+  // checksum: &line[line.len()-6..line.len()-1]
+  let checksum = &line[line.len()-6..line.len()-1];
+  let code = &line[0..line.len()-11];
+  let sector_id = line[line.len()-10..line.len()-7].parse::<u32>().unwrap();
+  Room {
+    checksum: checksum,
+    sector_id: sector_id,
+    code: code
+  }
+}
+
+fn part1(input: String) -> String  {
 
   let mut counter:u32 = 0;
 
   let parts:Vec<&str> = input.split("\n").collect();
   for line in &parts {
-
-    // sector id: &line[line.len()-10..line.len()-7]
-    // checksum: &line[line.len()-6..line.len()-1]
-    let checksum = &line[line.len()-6..line.len()-1];
-    let code = &line[0..line.len()-11];
-    let sector_id = line[line.len()-10..line.len()-7].parse::<u32>().unwrap();
-    let room = Room {
-      checksum: checksum,
-      sector_id: sector_id,
-      code: code
-    };
-
+    let room = build_room(line);
     if room.is_real() {
       counter += room.sector_id;
     }
@@ -83,15 +85,7 @@ fn part2 (input: String) -> String  {
 
     // sector id: &line[line.len()-10..line.len()-7]
     // checksum: &line[line.len()-6..line.len()-1]
-    let checksum = &line[line.len()-6..line.len()-1];
-    let code = &line[0..line.len()-11];
-    let sector_id = line[line.len()-10..line.len()-7].parse::<u32>().unwrap();
-    let room = Room {
-      checksum: checksum,
-      sector_id: sector_id,
-      code: code
-    };
-
+    let room = build_room(line);
     if room.is_real() {
       // translate code
       let mut translated = String::new();
