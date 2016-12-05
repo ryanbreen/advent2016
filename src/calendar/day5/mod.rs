@@ -31,15 +31,13 @@ fn part2 (input: String) -> String  {
   let mut idx:usize = 0;
   let mut len = 0;
 
-  let mut password:String = "xxxxxxxx".to_string();
+  let mut password:Vec<u8> = vec!(120, 120, 120, 120, 120, 120, 120, 120);
   let mut sh = Md5::new();
 
   let start = Instant::now();
 
-  print!("\r--------");
-
   let mut current_placeholder = 0;
-  let placeholders = ['-', '\\', '|', '/'];
+  let placeholders:[u8;4] = ['-' as u8, '\\' as u8, '|' as u8, '/' as u8];
 
   loop {
     sh.input_str(format!("{}{}", input, idx).as_str());
@@ -48,13 +46,16 @@ fn part2 (input: String) -> String  {
     sh.reset();
 
     // Only run this on a fraction of indices for speed.
-    if idx % 100 == 0 {
-      print!("\r {}", password.chars().map(|c| {
-        match c {
-          'x' => placeholders[current_placeholder],
-          _ => c
-        }
-      }).collect::<String>());
+    if idx % 1000 == 0 {
+      print!("\r {}", String::from_utf8(
+        (password.iter().map(|c| {
+          match c {
+            &120 => placeholders[current_placeholder],
+            _ => *c
+          }
+        }).collect::<Vec<u8>>())).unwrap()
+      );
+
       current_placeholder += 1;
       if current_placeholder > 3 {
         current_placeholder = 0;
@@ -69,18 +70,16 @@ fn part2 (input: String) -> String  {
 
       pos -= 48;
   
-      if password.as_bytes()[pos as usize] != 'x' as u8 {
+      if password[pos as usize] != 'x' as u8 {
         continue;
       }
 
-      let mut new_pass_bytes = password.into_bytes();
-      new_pass_bytes[pos] = tmp.as_bytes()[6];
-      password = String::from_utf8(new_pass_bytes).unwrap();
+      password[pos] = tmp.as_bytes()[6];
 
       len += 1;
       if len == 8 {
         println!("That took {}s", start.elapsed().as_secs());
-        return password;
+        return String::from_utf8(password).unwrap();
       }
     }
   };
