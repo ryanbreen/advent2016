@@ -46,7 +46,7 @@ fn part2 (input: String) -> String  {
     sh.reset();
 
     // Only run this on a fraction of indices for speed.
-    if idx % 1000 == 0 {
+    if idx % 100 == 0 {
       print!("\r {}", String::from_utf8(
         (password.iter().map(|c| {
           match c {
@@ -55,6 +55,8 @@ fn part2 (input: String) -> String  {
           }
         }).collect::<Vec<u8>>())).unwrap()
       );
+
+      print!("\r{}", current_placeholder);
 
       current_placeholder += 1;
       if current_placeholder > 3 {
