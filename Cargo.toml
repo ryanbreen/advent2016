@@ -6,3 +6,4 @@ authors = ["Ryan Breen <rbreen@cimpress.com>"]
 [dependencies]
 getopts = "0.2"
 rust-crypto = "0.2.36"
+pbr = "0.3"

@@ -8,6 +8,8 @@ extern crate getopts;
 
 extern crate crypto;
 
+extern crate pbr;
+
 #[cfg(not(test))]
 use getopts::Options;
 

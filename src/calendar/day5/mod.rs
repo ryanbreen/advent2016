@@ -1,6 +1,8 @@
+use core::str;
 use crypto::digest::Digest;
 use crypto::md5::Md5;
 use std::time::Instant;
+use pbr::ProgressBar;
 
 const TEST:&'static str = "00000";
 
@@ -36,8 +38,9 @@ fn part2 (input: String) -> String  {
 
   let start = Instant::now();
 
-  let mut current_placeholder = 0;
-  let placeholders:[u8;4] = ['-' as u8, '\\' as u8, '|' as u8, '/' as u8];
+  let mut pb = ProgressBar::new(8);
+  pb.format("╢▌▌░╟");
+  pb.message(&String::from_utf8(password.clone()).unwrap());
 
   loop {
     sh.input_str(format!("{}{}", input, idx).as_str());
@@ -47,21 +50,7 @@ fn part2 (input: String) -> String  {
 
     // Only run this on a fraction of indices for speed.
     if idx % 100 == 0 {
-      print!("\r {}", String::from_utf8(
-        (password.iter().map(|c| {
-          match c {
-            &120 => placeholders[current_placeholder],
-            _ => *c
-          }
-        }).collect::<Vec<u8>>())).unwrap()
-      );
-
-      print!("\r{}", current_placeholder);
-
-      current_placeholder += 1;
-      if current_placeholder > 3 {
-        current_placeholder = 0;
-      }
+      // Anything?
     }
 
     if tmp.starts_with(TEST) {
@@ -76,11 +65,14 @@ fn part2 (input: String) -> String  {
         continue;
       }
 
+      pb.inc();
+
       password[pos] = tmp.as_bytes()[6];
+      pb.message(&String::from_utf8(password.clone()).unwrap());
 
       len += 1;
       if len == 8 {
-        println!("That took {}s", start.elapsed().as_secs());
+        pb.finish_print(&format!("That took {}s\n", start.elapsed().as_secs()));
         return String::from_utf8(password).unwrap();
       }
     }
