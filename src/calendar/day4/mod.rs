@@ -88,19 +88,18 @@ fn part2 (input: String) -> String  {
     let room = build_room(line);
     if room.is_real() {
       // translate code
-      let mut translated = String::new();
-      for c in room.code.chars() {
-        match c {
-          '-' => translated.push(' '),
-          _ => {
-            let mut idx:u32 = (c as u32) - 97;
-            idx += room.sector_id as u32;
-            let new_char:char = ((idx%26) as u8 + 97) as char;
-
-            translated.push(new_char);
+      let translated = room.code.chars()
+        .map(|c| {
+          match c {
+            '-' => ' ',
+            _ => {
+              let mut idx:u32 = (c as u32) - 97;
+              idx += room.sector_id as u32;
+              let new_char:char = ((idx%26) as u8 + 97) as char;
+              new_char
+            }
           }
-        };
-      }
+        }).collect::<String>();
 
       if translated == "northpole object storage" {
         return room.sector_id.to_string();
