@@ -64,11 +64,11 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "361724".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "asvcbhvg".to_string());
 }
 
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "482".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "odqnikqv".to_string());
 }
