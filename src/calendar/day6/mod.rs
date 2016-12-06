@@ -5,7 +5,6 @@ struct CharCount {
 }
 
 fn part1(input: String) -> String  {
-
   let mut parts:Vec<u8> = vec!(0,0,0,0,0,0,0,0);
   for i in 0..8 {
     let mut alphabet:Vec<CharCount> = vec![CharCount { c: '-', count: 0 }; 26];
@@ -26,8 +25,27 @@ fn part1(input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
+  let mut parts:Vec<u8> = vec!(0,0,0,0,0,0,0,0);
+  for i in 0..8 {
+    let mut alphabet:Vec<CharCount> = vec![CharCount { c: '-', count: 0 }; 26];
+    let lines:Vec<&str> = input.split("\n").collect();
+    for line in &lines {
+      let c = line.as_bytes()[i];
+      let idx = (c as usize) - 97;
+      alphabet[idx].c = c as char;
+      alphabet[idx].count += 1;
+    }
 
-  return "FAILED".to_string();
+    // Sort by count and then by alpha in case of a tie.
+    alphabet = alphabet.iter()
+      .filter(|cc| cc.c != '-')
+      .map(|cc| *cc)
+      .collect();
+    alphabet.sort_by(|a, b| a.count.cmp(&b.count));
+    parts[i] = alphabet[0].c as u8;
+  }
+
+  String::from_utf8(parts).unwrap()
 }
 
 pub fn fill() -> super::Day {
