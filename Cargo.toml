@@ -10,3 +10,4 @@ debug = true
 getopts = "0.2"
 rust-crypto = "0.2.36"
 pbr = "0.3"
+regex = "0.1"

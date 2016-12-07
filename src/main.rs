@@ -10,6 +10,8 @@ extern crate crypto;
 
 extern crate pbr;
 
+extern crate regex;
+
 #[cfg(not(test))]
 use getopts::Options;
 
@@ -65,5 +67,5 @@ fn main() {
 #[test]
 fn calendar_test() {
   let calendar = calendar::Calendar::new();
-  assert_eq!(calendar.days.len(), 6);
+  assert_eq!(calendar.days.len(), 7);
 }
