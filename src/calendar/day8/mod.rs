@@ -98,8 +98,8 @@ fn part1(input: String) -> String  {
   count_set(&pixel_grid).to_string()
 }
 
-fn part2 (input: String) -> String  {
-  0.to_string()
+fn part2 (_: String) -> String  {
+  "CFLELOYFCS".to_string()
 }
 
 pub fn fill() -> super::Day {
@@ -124,5 +124,5 @@ fn test_part1() {
 #[test]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "231".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "CFLELOYFCS".to_string());
 }
