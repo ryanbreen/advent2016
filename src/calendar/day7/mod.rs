@@ -49,8 +49,6 @@ fn part2 (input: String) -> String  {
   let mut codes:Vec<&str> = input.split("\n").collect();
   codes = codes.into_iter().filter(|code| {
 
-    //println!("Analyzing {}", code);
-
     for cap in bracket_contents.captures_iter(code) {
 
       // Grab the bab(s) from this cap
@@ -62,14 +60,11 @@ fn part2 (input: String) -> String  {
         }
       }
 
-      //println!("Found {:?} from {:?}", babs, bab_candidates);
-
       if babs.len() == 0 {
         continue;
       }
 
       for candidate_cap in candidate_contents.captures_iter(code) {
-        //println!("Looking in {}", candidate_cap.at(1).unwrap());
         for bab in &babs {
           if contains_aba(bab, candidate_cap.at(1).unwrap().as_bytes()) {
             return true;
