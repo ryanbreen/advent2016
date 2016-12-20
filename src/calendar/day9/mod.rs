@@ -76,7 +76,6 @@ fn size_of_substring(input: String) -> usize {
         my_size += marker_size * repeats;
 
         i += data_block_len;
-        //my_size += data_block_len;
       },
       _ => {
         my_size += 1;
@@ -84,6 +83,8 @@ fn size_of_substring(input: String) -> usize {
       }
     };
   }
+
+  //println!("Size of {} is {}", input, my_size);
 
   my_size
 }
