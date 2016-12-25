@@ -22,18 +22,18 @@ fn building_ref(building: &Building) -> &'static Building {
   }
 }
 
-struct Building {
+struct Building<'a> {
   floors: Vec<Floor>,
   elevator_on: usize,
-  prior_state: Option<&'static Building>
+  prior_state: Option<&'a Building>
 }
 
-impl Clone for Building {
+impl<'a> Clone for Building<'a> {
   fn clone(&self) -> Building {
     let mut new_building = Building {
       floors: vec!(),
       elevator_on: self.elevator_on,
-      prior_state: None,
+      prior_state: self.prior_state,
     };
 
     for floor in &self.floors {
@@ -44,7 +44,7 @@ impl Clone for Building {
   }
 }
 
-impl Building {
+impl<'a> Building<'a> {
   fn is_viable(&self) -> bool {
     for floor in self.floors.iter() {
       if !floor.is_viable() {
@@ -190,8 +190,6 @@ fn permute_items_on_floor(chip_map: &HashSet<&'static str>, generator_map: &Hash
   // Handle the case where only the elevator moves
   rvalue.push(vec!());
 
-  println!("{:?}", rvalue);
-
   rvalue
 }
 
@@ -282,7 +280,7 @@ fn permute(building: Building) -> usize {
     if potential_states.len() == 1 {
       //println!("Found match:\n{:?}", potential_states[0]);
 
-      //dump_state(Some(building_ref(&potential_states[0])));
+      dump_state(Some(building_ref(&potential_states[0])));
 
       return depth+1;
     }
