@@ -13,23 +13,14 @@ fn string_to_static_str(s: String) -> &'static str {
   }
 }
 
-// Gross unsafe hack to hoist a string to static
-fn building_ref(building: &Building) -> &'static Building {
-  unsafe {
-    let ret = mem::transmute(building);
-    mem::forget(building);
-    ret
-  }
-}
-
 struct Building<'a> {
   floors: Vec<Floor>,
   elevator_on: usize,
-  prior_state: Option<&'a Building>
+  prior_state: Option<&'a Building<'a>>
 }
 
 impl<'a> Clone for Building<'a> {
-  fn clone(&self) -> Building {
+  fn clone(&self) -> Building<'a> {
     let mut new_building = Building {
       floors: vec!(),
       elevator_on: self.elevator_on,
@@ -60,7 +51,7 @@ impl<'a> Building<'a> {
   }
 }
 
-impl fmt::Debug for Building {
+impl<'a> fmt::Debug for Building<'a> {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     for i in (0..self.floors.len()).rev() {
       let _ = write!(f, "{} {:?}\n", i, self.floors[i]);
@@ -70,7 +61,7 @@ impl fmt::Debug for Building {
   }
 }
 
-impl fmt::Display for Building {
+impl<'a> fmt::Display for Building<'a> {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     for i in (0..self.floors.len()).rev() {
       let _ = write!(f, "{} {:?}\n", i, self.floors[i]);
@@ -193,7 +184,7 @@ fn permute_items_on_floor(chip_map: &HashSet<&'static str>, generator_map: &Hash
   rvalue
 }
 
-fn generate_potential_states(starting_states: Vec<Building>, seen_states:&mut HashSet<String>) -> Vec<Building> {
+fn generate_potential_states<'a>(starting_states: &'a Vec<Building>, seen_states:& mut HashSet<String>) -> Vec<Building<'a>> {
   let mut rvalue = vec!();
 
   for starting_state in starting_states {
@@ -221,7 +212,7 @@ fn generate_potential_states(starting_states: Vec<Building>, seen_states:&mut Ha
       for data in &permutations {
 
         let mut new_building = starting_state.clone();
-        new_building.prior_state = Some(building_ref(&starting_state));
+        new_building.prior_state = Some(starting_state);
 
         // Remove items from current floor and add to next floor
         for &(is_generator, name) in data {
@@ -252,7 +243,7 @@ fn generate_potential_states(starting_states: Vec<Building>, seen_states:&mut Ha
   rvalue
 }
 
-fn dump_state(state: Option<&'static Building>) {
+fn dump_state<'a>(state: Option<&'a Building>) {
   let mut current = state;
   while current.is_some() {
     println!("{:?}", current);
@@ -260,7 +251,7 @@ fn dump_state(state: Option<&'static Building>) {
   }
 }
 
-fn permute(building: Building) -> usize {
+fn permute<'a>(building: Building) -> usize {
   // Possible permutations: elevator moves 1 floor with 0 to 2 items
 
   let mut depth = 1;
@@ -276,13 +267,17 @@ fn permute(building: Building) -> usize {
     // println!("Starting states:\n{:?}", starting_states);
 
     // Generate all possible states at this depth
-    let potential_states:Vec<Building> = generate_potential_states(starting_states, &mut seen_states);
-    if potential_states.len() == 1 {
-      //println!("Found match:\n{:?}", potential_states[0]);
+    let mut potential_states:Vec<Building> = vec!();
 
-      dump_state(Some(building_ref(&potential_states[0])));
+    {
+      potential_states = generate_potential_states(&starting_states, &mut seen_states);
+      if potential_states.len() == 1 {
+        //println!("Found match:\n{:?}", potential_states[0]);
 
-      return depth+1;
+        dump_state(Some(&potential_states[0]));
+
+        return depth+1;
+      }
     }
 
     //println!("Potential states:\n{:?}", potential_states);
