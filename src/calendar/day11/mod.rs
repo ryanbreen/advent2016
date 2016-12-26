@@ -184,7 +184,7 @@ fn permute_items_on_floor(chip_map: &HashSet<&'static str>, generator_map: &Hash
   rvalue
 }
 
-fn generate_potential_states<'a>(starting_states: &'a Vec<Building>, seen_states:& mut HashSet<String>) -> Vec<Building<'a>> {
+fn generate_potential_states<'a>(starting_states: &Vec<Building>, seen_states:& mut HashSet<String>) -> Vec<Building<'a>> {
   let mut rvalue = vec!();
 
   for starting_state in starting_states {
