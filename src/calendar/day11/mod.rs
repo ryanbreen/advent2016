@@ -13,17 +13,19 @@ fn string_to_static_str(s: String) -> &'static str {
   }
 }
 
-struct Building<'a> {
+struct Building {
   floors: Vec<Floor>,
   elevator_on: usize,
-  prior_state: Option<&'a Building<'a>>
+  state: usize,
+  prior_state: usize
 }
 
-impl<'a> Clone for Building<'a> {
-  fn clone(&self) -> Building<'a> {
+impl Clone for Building {
+  fn clone(&self) -> Building {
     let mut new_building = Building {
       floors: vec!(),
       elevator_on: self.elevator_on,
+      state: self.state,
       prior_state: self.prior_state,
     };
 
@@ -35,7 +37,7 @@ impl<'a> Clone for Building<'a> {
   }
 }
 
-impl<'a> Building<'a> {
+impl Building {
   fn is_viable(&self) -> bool {
     for floor in self.floors.iter() {
       if !floor.is_viable() {
@@ -49,25 +51,19 @@ impl<'a> Building<'a> {
   fn is_finished(&self) -> bool {
     self.floors[0].is_empty() && self.floors[1].is_empty() && self.floors[2].is_empty()
   }
-}
 
-impl<'a> fmt::Debug for Building<'a> {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    for i in (0..self.floors.len()).rev() {
-      let _ = write!(f, "{} {:?}\n", i, self.floors[i]);
-    }
-
-    write!(f, "E is on {}", self.elevator_on)
+  fn uuid(&self) -> String {
+    format!("{:?}{:?}{:?}{:?}{}", self.floors[0], self.floors[1], self.floors[2], self.floors[3], self.elevator_on)
   }
 }
 
-impl<'a> fmt::Display for Building<'a> {
+impl fmt::Debug for Building {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     for i in (0..self.floors.len()).rev() {
       let _ = write!(f, "{} {:?}\n", i, self.floors[i]);
     }
 
-    write!(f, "E is on {}", self.elevator_on)
+    write!(f, "E is on {}, prior_state is {}", self.elevator_on, self.prior_state)
   }
 }
 
@@ -184,8 +180,12 @@ fn permute_items_on_floor(chip_map: &HashSet<&'static str>, generator_map: &Hash
   rvalue
 }
 
-fn generate_potential_states<'a>(starting_states: &Vec<Building>, seen_states:& mut HashSet<String>) -> Vec<Building<'a>> {
-  let mut rvalue = vec!();
+fn enumerate_potential_states_from_depth(depth: u8,
+                                         starting_states: Vec<Building>,
+                                         mut seen_states: &mut HashSet<String>,
+                                         mut state_detail: &mut Vec<String>) -> u8 {
+
+  let mut potential_states = vec!();
 
   for starting_state in starting_states {
 
@@ -199,8 +199,6 @@ fn generate_potential_states<'a>(starting_states: &Vec<Building>, seen_states:& 
       target_floors.push(starting_state.elevator_on + 1);
     }
     
-    // println!("Target floors: {:?}", target_floors);
-    
     let permutations =
       permute_items_on_floor(
         &starting_state.floors[starting_state.elevator_on].chips,
@@ -212,7 +210,6 @@ fn generate_potential_states<'a>(starting_states: &Vec<Building>, seen_states:& 
       for data in &permutations {
 
         let mut new_building = starting_state.clone();
-        new_building.prior_state = Some(starting_state);
 
         // Remove items from current floor and add to next floor
         for &(is_generator, name) in data {
@@ -221,74 +218,52 @@ fn generate_potential_states<'a>(starting_states: &Vec<Building>, seen_states:& 
         }
 
         new_building.elevator_on = target_floor;
-        let new_building_id = new_building.to_string();
+        let new_building_id = new_building.uuid();
 
         if new_building.is_finished() {
           // YAY!
-          rvalue = vec!();
-          rvalue.push(new_building);
-          return rvalue;
+          dump_state(new_building.prior_state, state_detail);
+          return depth + 1;
         }
 
         // println!("Building {} is viable? {}", new_building_id, new_building.is_viable());
 
         if new_building.is_viable() && !seen_states.contains(&new_building_id) {
+          new_building.prior_state = starting_state.state;
+          new_building.state = state_detail.len();
           seen_states.insert(new_building_id);
-          rvalue.push(new_building);
+          state_detail.push(format!("{:?}", new_building));
+          potential_states.push(new_building);
         }
       }
     }
   }
 
-  rvalue
+  return enumerate_potential_states_from_depth(depth + 1, potential_states, &mut seen_states, &mut state_detail);
 }
 
-fn dump_state<'a>(state: Option<&'a Building>) {
-  let mut current = state;
-  while current.is_some() {
-    println!("{:?}", current);
-    current = current.unwrap().prior_state;
+fn dump_state(state_id: usize, state_detail: &Vec<String>) {
+  if state_id == 0 {
+    return;
   }
+
+  println!("***id {}***\n{}\n", state_id, state_detail[state_id]);
+
+  let re = Regex::new(r"prior_state is ([0-9]*)").unwrap();
+  let cap = re.captures(&state_detail[state_id]).unwrap();
+  dump_state(cap.at(1).unwrap().parse::<usize>().unwrap(), state_detail);
 }
 
-fn permute<'a>(building: Building) -> usize {
+fn permute(building: Building) -> u8 {
   // Possible permutations: elevator moves 1 floor with 0 to 2 items
 
-  let mut depth = 1;
-  let mut starting_states:Vec<Building> = vec!();
-  starting_states.push(building);
+  let depth:u8 = 1;
 
+  let starting_states:Vec<Building> = vec!(building.clone());
   let mut seen_states:HashSet<String> = HashSet::new();
+  let mut state_detail:Vec<String> = vec!(format!("{:?}", building));
 
-  loop {
-    depth += 1;
-
-    println!("There are {} starting states at depth {}", starting_states.len(), depth);
-    // println!("Starting states:\n{:?}", starting_states);
-
-    // Generate all possible states at this depth
-    let mut potential_states:Vec<Building> = vec!();
-
-    {
-      potential_states = generate_potential_states(&starting_states, &mut seen_states);
-      if potential_states.len() == 1 {
-        //println!("Found match:\n{:?}", potential_states[0]);
-
-        dump_state(Some(&potential_states[0]));
-
-        return depth+1;
-      }
-    }
-
-    //println!("Potential states:\n{:?}", potential_states);
-
-    assert!(potential_states.len() != 0);
-    
-    println!("Got {} potential states", potential_states.len());
-    // println!("{:?}", potential_states);
-
-    starting_states = potential_states;
-  }
+  return enumerate_potential_states_from_depth(depth, starting_states, &mut seen_states, &mut state_detail);
 }
 
 fn part1(input: String) -> String  {
@@ -299,7 +274,8 @@ fn part1(input: String) -> String  {
   let mut building = Building {
     floors: vec!(),
     elevator_on: 0,
-    prior_state: None,
+    state: 0,
+    prior_state: 0,
   };
 
   building.floors.push(Floor::new());
@@ -324,7 +300,6 @@ fn part1(input: String) -> String  {
     floor_n += 1;
   }
 
-  println!("Building:\n{:?}", building);
   permute(building).to_string()
 }
 
