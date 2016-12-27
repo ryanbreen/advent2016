@@ -141,7 +141,7 @@ fn permute_items_on_floor(chip_map: &BTreeSet<&'static str>, generator_map: &BTr
   let generators:Vec<&'static str> = generator_map.clone().into_iter().collect();
   let chips:Vec<&'static str> = chip_map.clone().into_iter().collect();
 
-  println!("G: {:?}, C: {:?}", generators, chips);
+  // println!("G: {:?}, C: {:?}", generators, chips);
 
   let mut rvalue:Vec<Vec<(bool, &'static str)>> = vec!();
 
@@ -175,9 +175,6 @@ fn permute_items_on_floor(chip_map: &BTreeSet<&'static str>, generator_map: &BTr
     tmp.push((false, chips[i]));
     rvalue.push(tmp);
   }
-
-  // Handle the case where only the elevator moves
-  rvalue.push(vec!());
 
   rvalue
 }
@@ -228,15 +225,15 @@ fn enumerate_potential_states_from_depth(depth: u8,
           new_building.state = state_detail.len();
           state_detail.push(format!("{:?}", new_building));
           dump_state(new_building.state, state_detail);
-          return depth + 1;
+          return depth;
         }
 
-        println!("Building {} is viable? {}", new_building_id, new_building.is_viable());
+        // println!("Building {} is viable? {}", new_building_id, new_building.is_viable());
 
         if new_building.is_viable() && !seen_states.contains(&new_building_id) {
           new_building.prior_state = starting_state.state;
           new_building.state = state_detail.len();
-          println!("Building id {} from {}", new_building.state, new_building.prior_state);
+          // println!("Building id {} from {}", new_building.state, new_building.prior_state);
           seen_states.insert(new_building_id);
           state_detail.push(format!("{:?}", new_building));
           potential_states.push(new_building);
@@ -245,27 +242,29 @@ fn enumerate_potential_states_from_depth(depth: u8,
     }
   }
 
-  println!("Generated {} potential_states:\n{:?}", potential_states.len(), potential_states);
+  println!("Generated {} potential_states at depth {}", potential_states.len(), depth);
 
   return enumerate_potential_states_from_depth(depth + 1, potential_states, &mut seen_states, &mut state_detail);
 }
 
 fn dump_state(state_id: usize, state_detail: &Vec<String>) {
+
+  println!("***id {}***\n{}\n", state_id, state_detail[state_id]);
+
   if state_id == 0 {
     return;
   }
 
-  println!("***id {}***\n{}\n", state_id, state_detail[state_id]);
-
   let re = Regex::new(r"prior_state is ([0-9]*)").unwrap();
   let cap = re.captures(&state_detail[state_id]).unwrap();
+
   dump_state(cap.at(1).unwrap().parse::<usize>().unwrap(), state_detail);
 }
 
 fn permute(building: Building) -> u8 {
   // Possible permutations: elevator moves 1 floor with 0 to 2 items
 
-  let depth:u8 = 2;
+  let depth:u8 = 1;
 
   let starting_states:Vec<Building> = vec!(building.clone());
   let mut seen_states:BTreeSet<String> = BTreeSet::new();
@@ -317,8 +316,8 @@ fn part2 (input: String) -> String  {
 
 pub fn fill() -> super::Day {
   return super::Day {
-    //input: include_str!("input").to_string(),
-    input: include_str!("sample_input").to_string(),
+    input: include_str!("input").to_string(),
+    //input: include_str!("sample_input").to_string(),
     part1: super::Puzzle {
       run: part1,
     },
