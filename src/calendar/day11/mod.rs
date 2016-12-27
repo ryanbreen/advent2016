@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use regex::Regex;
 use std::fmt;
 
@@ -68,15 +68,15 @@ impl fmt::Debug for Building {
 }
 
 struct Floor {
-  generators: HashSet<&'static str>,
-  chips: HashSet<&'static str>,
+  generators: BTreeSet<&'static str>,
+  chips: BTreeSet<&'static str>,
 }
 
 impl Clone for Floor {
   fn clone(&self) -> Floor {
     let mut new_floor = Floor {
-      generators: HashSet::new(),
-      chips: HashSet::new(),
+      generators: BTreeSet::new(),
+      chips: BTreeSet::new(),
     };
 
     for label in &self.generators {
@@ -94,8 +94,8 @@ impl Clone for Floor {
 impl Floor {
   fn new() -> Self {
     Floor {
-      generators: HashSet::new(),
-      chips: HashSet::new(),
+      generators: BTreeSet::new(),
+      chips: BTreeSet::new(),
     }
   }
 
@@ -136,10 +136,12 @@ impl fmt::Debug for Floor {
   }
 }
 
-fn permute_items_on_floor(chip_map: &HashSet<&'static str>, generator_map: &HashSet<&'static str>) -> Vec<Vec<(bool, &'static str)>> {
+fn permute_items_on_floor(chip_map: &BTreeSet<&'static str>, generator_map: &BTreeSet<&'static str>) -> Vec<Vec<(bool, &'static str)>> {
 
   let generators:Vec<&'static str> = generator_map.clone().into_iter().collect();
   let chips:Vec<&'static str> = chip_map.clone().into_iter().collect();
+
+  println!("G: {:?}, C: {:?}", generators, chips);
 
   let mut rvalue:Vec<Vec<(bool, &'static str)>> = vec!();
 
@@ -182,7 +184,7 @@ fn permute_items_on_floor(chip_map: &HashSet<&'static str>, generator_map: &Hash
 
 fn enumerate_potential_states_from_depth(depth: u8,
                                          starting_states: Vec<Building>,
-                                         mut seen_states: &mut HashSet<String>,
+                                         mut seen_states: &mut BTreeSet<String>,
                                          mut state_detail: &mut Vec<String>) -> u8 {
 
   let mut potential_states = vec!();
@@ -222,15 +224,19 @@ fn enumerate_potential_states_from_depth(depth: u8,
 
         if new_building.is_finished() {
           // YAY!
-          dump_state(new_building.prior_state, state_detail);
+          new_building.prior_state = starting_state.state;
+          new_building.state = state_detail.len();
+          state_detail.push(format!("{:?}", new_building));
+          dump_state(new_building.state, state_detail);
           return depth + 1;
         }
 
-        // println!("Building {} is viable? {}", new_building_id, new_building.is_viable());
+        println!("Building {} is viable? {}", new_building_id, new_building.is_viable());
 
         if new_building.is_viable() && !seen_states.contains(&new_building_id) {
           new_building.prior_state = starting_state.state;
           new_building.state = state_detail.len();
+          println!("Building id {} from {}", new_building.state, new_building.prior_state);
           seen_states.insert(new_building_id);
           state_detail.push(format!("{:?}", new_building));
           potential_states.push(new_building);
@@ -238,6 +244,8 @@ fn enumerate_potential_states_from_depth(depth: u8,
       }
     }
   }
+
+  println!("Generated {} potential_states:\n{:?}", potential_states.len(), potential_states);
 
   return enumerate_potential_states_from_depth(depth + 1, potential_states, &mut seen_states, &mut state_detail);
 }
@@ -257,10 +265,10 @@ fn dump_state(state_id: usize, state_detail: &Vec<String>) {
 fn permute(building: Building) -> u8 {
   // Possible permutations: elevator moves 1 floor with 0 to 2 items
 
-  let depth:u8 = 1;
+  let depth:u8 = 2;
 
   let starting_states:Vec<Building> = vec!(building.clone());
-  let mut seen_states:HashSet<String> = HashSet::new();
+  let mut seen_states:BTreeSet<String> = BTreeSet::new();
   let mut state_detail:Vec<String> = vec!(format!("{:?}", building));
 
   return enumerate_potential_states_from_depth(depth, starting_states, &mut seen_states, &mut state_detail);
