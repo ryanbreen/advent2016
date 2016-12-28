@@ -92,6 +92,66 @@ impl Map {
 
     0
   }
+
+  fn visit_depth_n(&mut self, x_start:usize, y_start:usize, max_depth:usize) -> usize {
+    let mut depth:usize = 0;
+    let mut seen_nodes:HashSet<(usize, usize)> = HashSet::new();
+
+    let mut available_nodes:HashSet<(usize, usize)> = HashSet::new();
+    available_nodes.insert((x_start, y_start));
+
+    while depth <= max_depth {
+
+      let iter = available_nodes.into_iter();
+
+      available_nodes = HashSet::new();
+
+      for node in iter {
+
+        self.traversed[node.1][node.0] = true;
+
+        available_nodes.remove(&node);
+        seen_nodes.insert((node.0, node.1));
+
+        // Find neighboring elements
+        for x in -1..2 {
+
+          let my_x:isize = node.0 as isize + x;
+          if my_x < 0 || my_x >= self.grid[0].len() as isize {
+            continue;
+          }
+
+          for y in -1..2 {
+
+            // Cut off diagonals.
+            if (x == -1 && y == -1) || (x == 1 && y == 1) || (x == 1 && y == -1) || (x == -1 && y == 1) {
+              continue;
+            }
+
+            let my_y:isize = node.1 as isize + y;
+            if my_y < 0 || my_y >= self.grid.len() as isize {
+              continue;
+            }
+
+            if seen_nodes.contains(&(my_x as usize, my_y as usize)) {
+              continue;
+            }
+
+            // If this part of the map is open, traverse to it.
+            if self.grid[my_y as usize][my_x as usize] {
+              available_nodes.insert((my_x as usize, my_y as usize));
+            }
+          }
+        }
+      }
+
+      depth += 1;
+    }
+
+    println!("{:?}", self);
+
+    seen_nodes.len()
+  }
 }
 
 impl fmt::Debug for Map {
@@ -125,13 +185,19 @@ fn part1(input: String) -> String  {
 
   map.fill_grid();
 
-  println!("{:?}", map);
-
   map.search_for_route(1, 1, 31, 39).to_string()
 }
 
-fn part2 (_: String) -> String  {
-  "0".to_string()
+fn part2 (input: String) -> String  {
+  let mut map = Map {
+    grid: [[false; MAP_WIDTH]; MAP_HEIGHT],
+    traversed: [[false; MAP_WIDTH]; MAP_HEIGHT],
+    seed: input.parse::<usize>().unwrap(),
+  };
+
+  map.fill_grid();
+
+  map.visit_depth_n(1, 1, 50).to_string()
 }
 
 pub fn fill() -> super::Day {
@@ -149,7 +215,7 @@ pub fn fill() -> super::Day {
 #[test]
 fn test_part1() {
   let day = fill();
-  assert_eq!((day.part1.run)(day.input.to_string()), "318083".to_string());
+  assert_eq!((day.part1.run)(day.input.to_string()), "90".to_string());
 }
 
 // Leaving disabled until I can make this fast enough.
