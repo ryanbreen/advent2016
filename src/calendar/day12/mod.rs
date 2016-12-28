@@ -58,7 +58,6 @@ impl<'a> Computer<'a> {
 
 
 fn part1(input: String) -> String  {
-
   let lines:Vec<&str> = input.split("\n").collect();
 
   let mut computer = Computer {
@@ -72,8 +71,18 @@ fn part1(input: String) -> String  {
   computer.registers[0].to_string()
 }
 
-fn part2 (_: String) -> String  {
-  "0".to_string()
+fn part2 (input: String) -> String  {
+  let lines:Vec<&str> = input.split("\n").collect();
+
+  let mut computer = Computer {
+    registers: [0, 0, 1, 0],
+    tape: &lines,
+    process_counter: 0,
+  };
+
+  computer.run();
+
+  computer.registers[0].to_string()
 }
 
 pub fn fill() -> super::Day {
@@ -99,5 +108,5 @@ fn test_part1() {
 #[allow(dead_code)]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "67".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "9227737".to_string());
 }
