@@ -1,5 +1,6 @@
-use std::collections::BTreeSet;
 use regex::Regex;
+
+use std::collections::BTreeSet;
 use std::fmt;
 
 use std::mem;

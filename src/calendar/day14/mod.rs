@@ -12,22 +12,22 @@ fn part1(input: String) -> String  {
   let mut keys:Vec<usize> = vec!();
 
   let mut run_handler = move |&idx, &c, size| -> usize {
+    
     if size == 3 {
       if !potential_keys.contains_key(&c) {
         potential_keys.insert(c, vec!());
       }
       potential_keys.get_mut(&c).unwrap().push(idx);
-    } else if size == 5 {
+    }
+    if size == 5 {
       if potential_keys.contains_key(&c) {
-        println!("Found five char run {}", &c);
         let candidates = potential_keys.get(&c).unwrap();
         for candidate in candidates {
           let distance = idx - candidate;
-          println!("Candidate {} distance {} at idx {} is {}", candidate, &c, idx, distance);
           if distance < 1000 {
             keys.push(idx);
             if keys.len() == 64 {
-              return *candidate;
+              return idx;
             }
           }
         }
@@ -48,19 +48,15 @@ fn part1(input: String) -> String  {
     let mut last_last_last_c = 'z';
     let mut last_last_last_last_c = 'z';
 
-    let mut match_character = 'z';
-    let mut three_run = false;
-    let mut five_run = false;
+    let mut matches:Vec<(char, usize)> = vec!();
 
     for c in sh.result_str().chars() {
       if c == last_c && c == last_last_c {
-        three_run = true;
-        match_character = c;
+        matches.push((c, 3));
       }
 
       if c == last_c && last_c == last_last_c && last_last_c == last_last_last_c && last_last_last_c == last_last_last_last_c {
-        five_run = true;
-        match_character = c;
+        matches.push((c, 5));
       }
 
       last_last_last_last_c = last_last_last_c;
@@ -69,13 +65,21 @@ fn part1(input: String) -> String  {
       last_c = c;
     }
 
-    if five_run {
-      let rvalue = run_handler(&i, &match_character, 5);
-      if rvalue != 0 {
-        return rvalue.to_string();
+    let i_con = i.clone();
+
+    for idx in 0..matches.len() {
+      if matches[idx].1 == 5 {
+        let rvalue = run_handler(&i_con, &matches[idx].0, 5);
+        if rvalue != 0 {
+          return rvalue.to_string();
+        }  
       }
-    } else if three_run {
-      run_handler(&i, &match_character, 3);
+    }
+
+    for idx in 0..matches.len() {
+      if matches[idx].1 == 3 {
+        run_handler(&i_con, &matches[idx].0, 3);
+      }
     }
 
     i += 1;
