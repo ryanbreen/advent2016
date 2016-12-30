@@ -93,7 +93,23 @@ fn part1(input: String) -> String  {
 }
 
 fn part2 (input: String) -> String  {
-  0.to_string()
+
+  let mut sculpture = Sculpture { discs: vec!(), capsule_pos: 0, t: 0 };
+  sculpture.load_discs(input);
+  sculpture.discs.push(box Disc { positions: 11, start_pos: 0 });
+
+  let mut t = 0;
+
+  loop {
+
+    t += 1;
+
+    if sculpture.start_at(t) {
+      return t.to_string();
+    }
+
+    sculpture.reset();
+  }
 }
 
 pub fn fill() -> super::Day {
