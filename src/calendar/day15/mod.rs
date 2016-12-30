@@ -135,5 +135,5 @@ fn test_part1() {
 #[allow(dead_code)]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "22429".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "3208099".to_string());
 }
