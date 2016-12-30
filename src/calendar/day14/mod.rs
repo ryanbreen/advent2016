@@ -3,10 +3,9 @@ use crypto::md5::Md5;
 
 use std::collections::HashMap;
 
-fn part1(input: String) -> String  {
+fn generate_keys(input: String, stretch_keys: bool) -> String {
 
   let mut sh = Md5::new();
-
 
   let mut potential_keys:HashMap<char, Vec<usize>> = HashMap::new();
   let mut keys:Vec<usize> = vec!();
@@ -25,9 +24,10 @@ fn part1(input: String) -> String  {
         for candidate in candidates {
           let distance = idx - candidate;
           if distance < 1000 {
+            //println!("Candidate {} (char {}) ({} ago) at idx {}", candidate, &c, distance, idx);
             keys.push(idx);
             if keys.len() == 64 {
-              return idx;
+              return *candidate;
             }
           }
         }
@@ -41,6 +41,17 @@ fn part1(input: String) -> String  {
   let mut i = 0;
   loop {
     sh.input_str(format!("{}{}", input, i).as_str());
+    let mut result_str = sh.result_str();
+
+    if stretch_keys {
+      for _ in 0..2016 {
+        sh.reset();
+        sh.input_str(&result_str);
+        result_str = sh.result_str();
+      }
+    }
+
+    sh.reset();
 
     // This is gross, but I couldn't figure out how to get regex working.
     let mut last_c = 'z';
@@ -48,15 +59,20 @@ fn part1(input: String) -> String  {
     let mut last_last_last_c = 'z';
     let mut last_last_last_last_c = 'z';
 
-    let mut matches:Vec<(char, usize)> = vec!();
+    let mut match_three = false;
+    let mut match_five = false;
 
-    for c in sh.result_str().chars() {
-      if c == last_c && c == last_last_c {
-        matches.push((c, 3));
+    let mut match_char = 'z';
+
+    for c in result_str.chars() {
+      if !match_three && c == last_c && c == last_last_c {
+        match_char = c;
+        match_three = true;
       }
 
       if c == last_c && last_c == last_last_c && last_last_c == last_last_last_c && last_last_last_c == last_last_last_last_c {
-        matches.push((c, 5));
+        //println!("Found five char run {} at {}", c, i);
+        match_five = true;
       }
 
       last_last_last_last_c = last_last_last_c;
@@ -67,29 +83,28 @@ fn part1(input: String) -> String  {
 
     let i_con = i.clone();
 
-    for idx in 0..matches.len() {
-      if matches[idx].1 == 5 {
-        let rvalue = run_handler(&i_con, &matches[idx].0, 5);
-        if rvalue != 0 {
-          return rvalue.to_string();
-        }  
+    if match_five {
+      let rvalue = run_handler(&i_con, &match_char, 5);
+      if rvalue != 0 {
+        return rvalue.to_string();  
       }
-    }
-
-    for idx in 0..matches.len() {
-      if matches[idx].1 == 3 {
-        run_handler(&i_con, &matches[idx].0, 3);
-      }
+      //println!("Found three char run {} at {}", match_char, i_con);
+      run_handler(&i_con, &match_char, 3);
+    } else if match_three {
+      //println!("Found three char run {} at {}", match_char, i_con);
+      run_handler(&i_con, &match_char, 3);
     }
 
     i += 1;
-
-    sh.reset();
   }
 }
 
-fn part2 (_: String) -> String  {
-  "0".to_string()
+fn part1(input: String) -> String  {
+  generate_keys(input, false)
+}
+
+fn part2 (input: String) -> String  {
+  generate_keys(input, true)
 }
 
 pub fn fill() -> super::Day {
