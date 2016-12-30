@@ -1,12 +1,5 @@
 
-fn part1(input: String) -> String  {
-
-  let target_len = match input.as_str() {
-    "11101000110010100" => 272,
-    "10000" => 20,
-    _ => 24,
-  };
-
+fn fill_disc(input: String, target_len: usize) -> String {
   let mut filler = vec!();
 
   // Build filler from input
@@ -71,8 +64,19 @@ fn part1(input: String) -> String  {
   String::from_utf8(ascii_vec).unwrap()
 }
 
+fn part1(input: String) -> String  {
+
+  let target_len = match input.as_str() {
+    "11101000110010100" => 272,
+    "10000" => 20,
+    _ => 24,
+  };
+
+  fill_disc(input, target_len)
+}
+
 fn part2 (input: String) -> String  {
-  0.to_string()
+  fill_disc(input, 35651584)
 }
 
 pub fn fill() -> super::Day {
@@ -99,5 +103,5 @@ fn test_part1() {
 #[allow(dead_code)]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "3208099".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "01100001101101001".to_string());
 }
