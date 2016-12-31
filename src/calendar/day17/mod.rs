@@ -86,8 +86,51 @@ fn part1(input: String) -> String  {
   search_for_route(input)
 }
 
+fn search_for_longest_route(start: String) -> String {
+  let mut longest = 0;
+
+  let mut available_nodes:Vec<(usize, usize, String)> = vec!();
+  available_nodes.push((0, 0, start.clone()));
+
+  while !available_nodes.is_empty() {
+
+    let iter = available_nodes.clone().into_iter();
+
+    available_nodes.clear();
+
+    for node in iter {
+
+      if node.0 == 3 && node.1 == 3 {
+        let candidate = node.2.len() - start.len();
+        if candidate > longest {
+          longest = candidate;
+        }
+        continue;
+      }
+
+      let valid_directions = find_valid_directions(&node.2, node.0, node.1);
+
+      for dir in valid_directions {
+        let mut new_str = node.2.clone();
+        new_str.push(dir);
+        match dir {
+          'U' => available_nodes.push((node.0, node.1 - 1, new_str)),
+          'D' => available_nodes.push((node.0, node.1 + 1, new_str)),
+          'L' => available_nodes.push((node.0 - 1, node.1, new_str)),
+          'R' => available_nodes.push((node.0 + 1, node.1, new_str)),
+          _ => panic!("WTF"),
+        };
+      }
+    }
+
+    //println!("available_nodes count {} at depth {}", available_nodes.len(), depth);
+  }
+
+  longest.to_string()
+}
+
 fn part2 (input: String) -> String  {
-  0.to_string()
+  search_for_longest_route(input)
 }
 
 pub fn fill() -> super::Day {
@@ -112,5 +155,5 @@ fn test_part1() {
 #[allow(dead_code)]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "01100001101101001".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "448".to_string());
 }
