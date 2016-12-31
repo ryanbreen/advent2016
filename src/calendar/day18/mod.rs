@@ -1,14 +1,9 @@
 
-fn part1(input: String) -> String  {
-  let row_count = match input.as_str() {
-    "..^^." => 3,
-    ".^^.^.^^^^" => 10,
-    _ => 40,
-  };
+fn safe_count(input: String, row_count: usize) -> usize {
 
-  println!("{}", input);
+  //println!("{}", input);
 
-  let mut safe_count = input.clone().chars().fold(0usize, |sum, val| {
+  let mut safe_count = input.chars().fold(0usize, |sum, val| {
     if val == '.' {
       return sum + 1;
     }
@@ -35,7 +30,7 @@ fn part1(input: String) -> String  {
       };
 
       let center = chars[i] != '^';
-      let mut c = 'z';
+      let c;
 
       // println!("{} l-{} m-{} r-{}", i, left, right, center);
 
@@ -57,14 +52,30 @@ fn part1(input: String) -> String  {
 
     last_row = String::from_utf8(next_row).unwrap();
 
-    println!("{}", last_row);
+    //println!("{}", last_row);
   }
 
-  safe_count.to_string()
+  safe_count
 }
 
-fn part2(_: String) -> String  {
-  0.to_string()
+fn part1(input: String) -> String  {
+  let row_count = match input.as_str() {
+    "..^^." => 3,
+    ".^^.^.^^^^" => 10,
+    _ => 40,
+  };
+
+  safe_count(input, row_count).to_string()
+}
+
+fn part2(input: String) -> String  {
+  let row_count = match input.as_str() {
+    "..^^." => 3,
+    ".^^.^.^^^^" => 10,
+    _ => 400000,
+  };
+
+  safe_count(input, row_count).to_string()
 }
 
 pub fn fill() -> super::Day {
@@ -89,5 +100,5 @@ fn test_part1() {
 #[allow(dead_code)]
 fn test_part2() {
   let day = fill();
-  assert_eq!((day.part2.run)(day.input.to_string()), "448".to_string());
+  assert_eq!((day.part2.run)(day.input.to_string()), "20008491".to_string());
 }
